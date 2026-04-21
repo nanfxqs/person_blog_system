@@ -14,6 +14,13 @@
   <div class="form-group">
     <label for="summary">Summary</label>
     <textarea id="summary" name="summary" rows="2">{{ post.summary if post else '' }}</textarea>
+    {% if post %}
+    <div class="ai-action-row">
+      <button type="button" id="btn-generate-summary" class="btn btn-ai" onclick="generateSummary()">生成 AI 摘要</button>
+      <span id="ai-summary-status" class="ai-status"></span>
+    </div>
+    <div id="ai-summary-result" class="ai-result" style="display:none;"></div>
+    {% endif %}
   </div>
   <div class="form-group">
     <label for="contentMd">Content (Markdown)</label>
@@ -146,6 +153,46 @@ async function deletePost() {
     }
   } catch (err) {
     alert('Network error.');
+  }
+}
+
+async function generateSummary() {
+  if (!postId) return;
+  const btn = document.getElementById('btn-generate-summary');
+  const status = document.getElementById('ai-summary-status');
+  const result = document.getElementById('ai-summary-result');
+  const summaryField = document.getElementById('summary');
+
+  btn.disabled = true;
+  btn.textContent = '生成中...';
+  status.textContent = '';
+  result.style.display = 'none';
+
+  const csrfToken = getCsrfToken();
+  try {
+    const response = await fetch('/api/admin/posts/' + postId + '/summary:generate', {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': csrfToken },
+    });
+
+    const data = await response.json();
+    if (response.ok && data.summary) {
+      summaryField.value = data.summary;
+      result.textContent = data.summary;
+      result.style.display = 'block';
+      status.textContent = '摘要已生成并填入上方输入框';
+      status.className = 'ai-status ai-status-success';
+    } else {
+      const msg = data.message || '生成失败，请稍后重试';
+      status.textContent = msg;
+      status.className = 'ai-status ai-status-error';
+    }
+  } catch (err) {
+    status.textContent = '网络错误，请稍后重试';
+    status.className = 'ai-status ai-status-error';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '生成 AI 摘要';
   }
 }
 </script>

@@ -435,3 +435,81 @@ a:hover {
   color: #6b7280;
   font-style: italic;
 }
+
+/* ===== AI Features ===== */
+.btn-ai {
+  background: #7c3aed;
+}
+
+.btn-ai:hover {
+  background: #6d28d9;
+}
+
+.btn-ai:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ai-action-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.ai-status {
+  font-size: 0.8125rem;
+  display: inline-block;
+}
+
+.ai-status-success {
+  color: #059669;
+}
+
+.ai-status-error {
+  color: #dc2626;
+}
+
+.ai-result {
+  margin-top: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #1a1a1a;
+  white-space: pre-wrap;
+}
+
+.ai-qa-section {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.ai-qa-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.ai-qa-hint {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.ai-qa-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.ai-qa-form .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.ai-qa-form input {
+  width: 100%;
+}

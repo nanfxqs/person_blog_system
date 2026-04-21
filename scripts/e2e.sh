@@ -17,9 +17,13 @@ set -euo pipefail
 
 # ── Parse arguments ───────────────────────────────────────────────────────────
 SKIP_AI=false
+SKIP_BUILD=false
+NO_RECREATE=false
 for arg in "$@"; do
   case "$arg" in
     --skip-ai) SKIP_AI=true ;;
+    --no-build) SKIP_BUILD=true ;;
+    --no-recreate) NO_RECREATE=true ;;
     *) echo "Unknown argument: $arg"; exit 1 ;;
   esac
 done
@@ -128,8 +132,13 @@ echo "" >> "$EVIDENCE_FILE"
 log_step "Step 1: Start Services"
 
 cd "$PROJECT_DIR"
-$DOCKER_COMPOSE up -d --build 2>&1 | tee -a "$EVIDENCE_FILE"
-log_ok "docker compose up -d executed"
+if $SKIP_BUILD || $NO_RECREATE; then
+  $DOCKER_COMPOSE up -d --no-recreate 2>&1 | tee -a "$EVIDENCE_FILE"
+  log_ok "docker compose up -d executed (no build, no recreate)"
+else
+  $DOCKER_COMPOSE up -d --build 2>&1 | tee -a "$EVIDENCE_FILE"
+  log_ok "docker compose up -d --build executed"
+fi
 
 # ── Step 2: Wait for health check ────────────────────────────────────────────
 log_step "Step 2: Wait for Health Check"
