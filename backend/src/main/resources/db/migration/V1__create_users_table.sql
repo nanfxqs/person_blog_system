@@ -1,0 +1,9 @@
+CREATE TABLE users (
+    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    email TEXT NOT NULL,
+    password_hash TEXT NOT NULL,
+    role TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+    CONSTRAINT users_email_uk UNIQUE (email)
+);

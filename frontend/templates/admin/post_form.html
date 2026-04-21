@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Post' if post else 'New Post' }} - Admin{% endblock %}
+{% block content %}
+<div class="admin-header">
+  <h1>{{ 'Edit Post' if post else 'New Post' }}</h1>
+  <a href="/admin" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+<form id="post-form" class="post-form">
+  <div class="form-group">
+    <label for="title">Title</label>
+    <input type="text" id="title" name="title" value="{{ post.title if post else '' }}" required />
+  </div>
+  <div class="form-group">
+    <label for="summary">Summary</label>
+    <textarea id="summary" name="summary" rows="2">{{ post.summary if post else '' }}</textarea>
+  </div>
+  <div class="form-group">
+    <label for="contentMd">Content (Markdown)</label>
+    <textarea id="contentMd" name="contentMd" rows="15" required>{{ post.contentMd if post else '' }}</textarea>
+  </div>
+  <div class="form-actions">
+    <button type="submit" class="btn">Save as Draft</button>
+    {% if post %}
+      {% if post.status == 'draft' %}
+        <button type="button" class="btn btn-publish" onclick="saveAndPublish()">Save &amp; Publish</button>
+      {% else %}
+        <button type="button" class="btn btn-unpublish" onclick="saveAndUnpublish()">Save &amp; Unpublish</button>
+      {% endif %}
+      <button type="button" class="btn btn-danger" onclick="deletePost()">Delete</button>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const postId = {{ post.id if post else 'null' }};
+
+async function savePost(data) {
+  const csrfToken = getCsrfToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    'X-CSRF-Token': csrfToken,
+  };
+
+  if (postId) {
+    const response = await fetch('/api/admin/posts/' + postId, {
+      method: 'PUT',
+      headers: headers,
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to save post');
+    return response.json();
+  } else {
+    const response = await fetch('/api/admin/posts', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(data),
+    });
+    if (!response.ok && response.status !== 201) throw new Error('Failed to create post');
+    return response.json();
+  }
+}
+
+document.getElementById('post-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const data = {
+    title: form.title.value,
+    summary: form.summary.value,
+    contentMd: form.contentMd.value,
+  };
+
+  try {
+    await savePost(data);
+    window.location.href = '/admin';
+  } catch (err) {
+    alert('Failed to save post.');
+  }
+});
+
+async function saveAndPublish() {
+  const form = document.getElementById('post-form');
+  const data = {
+    title: form.title.value,
+    summary: form.summary.value,
+    contentMd: form.contentMd.value,
+  };
+
+  try {
+    const saved = await savePost(data);
+    const csrfToken = getCsrfToken();
+    const response = await fetch('/api/admin/posts/' + saved.id + '/publish', {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': csrfToken },
+    });
+    if (response.ok) {
+      window.location.href = '/admin';
+    } else {
+      alert('Post saved but failed to publish.');
+    }
+  } catch (err) {
+    alert('Failed to save and publish post.');
+  }
+}
+
+async function saveAndUnpublish() {
+  const form = document.getElementById('post-form');
+  const data = {
+    title: form.title.value,
+    summary: form.summary.value,
+    contentMd: form.contentMd.value,
+  };
+
+  try {
+    const saved = await savePost(data);
+    const csrfToken = getCsrfToken();
+    const response = await fetch('/api/admin/posts/' + saved.id + '/unpublish', {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': csrfToken },
+    });
+    if (response.ok) {
+      window.location.href = '/admin';
+    } else {
+      alert('Post saved but failed to unpublish.');
+    }
+  } catch (err) {
+    alert('Failed to save and unpublish post.');
+  }
+}
+
+async function deletePost() {
+  if (!postId) return;
+  if (!confirm('Are you sure you want to delete this post?')) return;
+  const csrfToken = getCsrfToken();
+  try {
+    const response = await fetch('/api/admin/posts/' + postId, {
+      method: 'DELETE',
+      headers: { 'X-CSRF-Token': csrfToken },
+    });
+    if (response.ok) {
+      window.location.href = '/admin';
+    } else {
+      alert('Failed to delete post.');
+    }
+  } catch (err) {
+    alert('Network error.');
+  }
+}
+</script>
+{% endblock %}

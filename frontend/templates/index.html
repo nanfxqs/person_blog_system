@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Blog{% endblock %}
+{% block content %}
+<h1>Blog Posts</h1>
+{% if posts %}
+  <ul class="post-list">
+    {% for post in posts %}
+    <li class="post-item">
+      <h2><a href="/posts/{{ post.id }}">{{ post.title }}</a></h2>
+      {% if post.summary %}
+        <p class="post-summary">{{ post.summary }}</p>
+      {% endif %}
+      {% if post.publishedAt %}
+        <time class="post-date">{{ post.publishedAt }}</time>
+      {% elif post.createdAt %}
+        <time class="post-date">{{ post.createdAt }}</time>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p class="empty-message">No posts yet.</p>
+{% endif %}
+{% endblock %}

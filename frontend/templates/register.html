@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="auth-form-wrapper">
+  <h1>Register</h1>
+  <form id="register-form" class="auth-form">
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required autocomplete="email" />
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required autocomplete="new-password" />
+    </div>
+    <div class="form-group">
+      <label for="confirmPassword">Confirm Password</label>
+      <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="new-password" />
+    </div>
+    <button type="submit" class="btn">Register</button>
+  </form>
+  <p class="auth-switch">Already have an account? <a href="/login">Login</a></p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+
+  if (form.password.value !== form.confirmPassword.value) {
+    alert('Passwords do not match.');
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: form.email.value,
+        password: form.password.value,
+      }),
+    });
+
+    if (response.ok || response.status === 201) {
+      window.location.href = '/login';
+    } else if (response.status === 409) {
+      alert('Email already registered.');
+    } else {
+      alert('Registration failed. Please try again.');
+    }
+  } catch (err) {
+    alert('Network error. Please try again.');
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Blog{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">Blog</a>
+    <div class="navbar-links">
+      {% if user %}
+        <span class="navbar-user">{{ user.email }}</span>
+        {% if user.role == 'admin' %}
+          <a href="/admin">Admin</a>
+        {% endif %}
+        <a href="#" onclick="logout(); return false;">Logout</a>
+      {% else %}
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2024 Blog. All rights reserved.</p>
+  </footer>
+
+  <script>
+    function getCsrfToken() {
+      const match = document.cookie.match(/csrf_token=([^;]+)/);
+      return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    async function logout() {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+      } catch (e) {
+        // ignore
+      }
+      window.location.href = '/';
+    }
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

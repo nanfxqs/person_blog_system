@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} - Blog{% endblock %}
+{% block content %}
+<article class="post-detail">
+  <h1>{{ post.title }}</h1>
+  {% if post.summary %}
+    <p class="post-summary">{{ post.summary }}</p>
+  {% endif %}
+  {% if post.publishedAt %}
+    <time class="post-date">Published: {{ post.publishedAt }}</time>
+  {% endif %}
+  <div class="post-content">
+    {{ post.content_html }}
+  </div>
+</article>
+
+<section class="comments-section">
+  <h2>Comments</h2>
+  {% if comments %}
+    <ul class="comment-list">
+      {% for comment in comments %}
+      <li class="comment-item">
+        <p class="comment-content">{{ comment.content }}</p>
+        <time class="comment-date">{{ comment.createdAt }}</time>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty-message">No comments yet.</p>
+  {% endif %}
+
+  {% if user %}
+  <form id="comment-form" class="comment-form">
+    <div class="form-group">
+      <label for="comment-content">Write a comment</label>
+      <textarea id="comment-content" name="content" rows="4" required></textarea>
+    </div>
+    <button type="submit" class="btn">Post Comment</button>
+  </form>
+  {% else %}
+    <p class="login-prompt"><a href="/login">Log in</a> to post a comment.</p>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('comment-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const content = document.getElementById('comment-content').value.trim();
+  if (!content) return;
+
+  const csrfToken = getCsrfToken();
+  try {
+    const response = await fetch('/api/posts/{{ post.id }}/comments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken,
+      },
+      body: JSON.stringify({ content: content }),
+    });
+
+    if (response.ok || response.status === 201) {
+      window.location.reload();
+    } else {
+      alert('Failed to post comment. Please try again.');
+    }
+  } catch (err) {
+    alert('Network error. Please try again.');
+  }
+});
+</script>
+{% endblock %}

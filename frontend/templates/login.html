@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="auth-form-wrapper">
+  <h1>Login</h1>
+  <form id="login-form" class="auth-form">
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required autocomplete="email" />
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required autocomplete="current-password" />
+    </div>
+    <button type="submit" class="btn">Login</button>
+  </form>
+  <p class="auth-switch">Don't have an account? <a href="/register">Register</a></p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  try {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: form.email.value,
+        password: form.password.value,
+      }),
+    });
+
+    if (response.ok) {
+      window.location.href = '/';
+    } else {
+      alert('Login failed. Please check your email and password.');
+    }
+  } catch (err) {
+    alert('Network error. Please try again.');
+  }
+});
+</script>
+{% endblock %}
